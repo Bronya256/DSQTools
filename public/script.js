@@ -48,7 +48,7 @@ function ProcessText(input) {
         
         // 3. 解析成功：检查是否为 undefined (例如只写了注释)
         if (!result) { 
-             output = '只有注释，没有数据';
+             output = '没有数据吗我问一嘴';
         }
         else
         {
