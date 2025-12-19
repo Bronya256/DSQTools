@@ -143,3 +143,5 @@ vite.config.ts.timestamp-*
 
 # syncthing
 .st*
+
+push脚本.ps1
