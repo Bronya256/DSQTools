@@ -1,0 +1,178 @@
+/* CSS 部分 - 负责页面的好看来 */
+
+/* 设置整个页面的样式 */
+body {
+    margin: 0;
+    min-height: 100vh;
+    /* 让页面占满整个屏幕高度 */
+    display: flex;
+    flex-direction: column;
+    /* 使用 Flex 布局让内容居中 */
+    justify-content: flex-start;
+    /* 水平居中 */
+    align-items: center;
+    /* 垂直居中 */
+    font-family: 'JetBrains Mono', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: white;
+
+    /* 这里就是你要的【渐变色背景】 */
+    /* linear-gradient(角度, 颜色1, 颜色2) */
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding-top: 5%;
+    /* 顶部留点空隙 */
+    padding-bottom: 60px;
+    /* 底部给 footer 留位置 */
+}
+
+/* 中间卡片的样式 */
+.card {
+    background: rgba(255, 255, 255, 0.15);
+    /* 半透明白色背景 */
+    backdrop-filter: blur(10px);
+    /* 毛玻璃模糊效果 */
+    padding: 40px;
+    border-radius: 20px;
+    /* 圆角 */
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    /* 阴影 */
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+    margin: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+h1 {
+    margin-top: 0;
+    font-size: 2em;
+    margin-bottom: 10px;
+}
+
+p {
+    color: #e0e0e0;
+    margin-bottom: 30px;
+}
+
+.headmiku {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 20px;
+    border: 4px solid white;
+    display: block;
+    /* 防止图片底部有空隙 */
+    margin: 0 auto 20px auto;
+    /* 上下留空，左右居中 */
+}
+
+.TrmInput {
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    /* border-radius: 50px; */
+    width: 100%;
+    height: 40vh;
+    margin-bottom: 20px;
+    background: rgba(255, 255, 255, 0.5);
+    /* 半透明背景 */
+    outline: none;
+    /* 最重要的一步：去掉默认聚焦黑/蓝框 */
+    padding: 10px;
+    font-family: 'JetBrains Mono', 'Segoe UI';
+    font-size: 16px;
+    color: white;
+    /* 输入的文字颜色 */
+    box-sizing: border-box;
+    resize: none;
+}
+
+.TrmInput::-webkit-scrollbar {
+    width: 8px;
+}
+
+.TrmInput::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+}
+
+.TrmInput::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* 4. 鼠标悬停在滑块上时的样子 */
+.magic-textarea::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+    /* 变亮一点，提示用户可以拖动 */
+    cursor: pointer;
+}
+
+/* 按钮的样式 */
+.action-btn {
+    background-color: #ff6b6b;
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    font-size: 18px;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s;
+    /* 颜色变化的过渡效果 */
+    outline: none;
+    user-select: none;
+}
+
+.action-btn:hover {
+    background-color: #ff5252;
+    /* 鼠标悬停时的颜色 */
+}
+
+/* 定义“Q弹”的动画关键帧 */
+@keyframes bounce-animation {
+    0% {
+        transform: scale(1);
+    }
+
+    40% {
+        transform: scale(0.9);
+    }
+
+    /* 按下去变小 */
+    60% {
+        transform: scale(1.1);
+    }
+
+    /* 弹起来变大 */
+    80% {
+        transform: scale(0.95);
+    }
+
+    /*稍微回弹 */
+    100% {
+        transform: scale(1);
+    }
+
+    /* 回到原样 */
+}
+
+/* 当按钮拥有这个类名时，执行动画 */
+.bounce {
+    animation: bounce-animation 0.4s ease;
+}
+
+/* footer 放到底部并横向居中 */
+.footer {
+    position: fixed;
+    /* 改为 fixed 保证一直在底部 */
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+    padding: 12px 0;
+    background: rgba(0, 0, 0, 0.2);
+    /* 稍微加点背景让文字看清 */
+    backdrop-filter: blur(5px);
+}
+
+.headpng {
+    width: 100%;
+    top: 5%;
+}
