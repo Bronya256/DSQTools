@@ -48,7 +48,8 @@ function ProcessText(input) {
         
         // 3. 解析成功：检查是否为 undefined (例如只写了注释)
         if (!result) { 
-             output = '没有数据吗我问一嘴';
+            output = '没有数据吗我问一嘴';
+            loadIcon('barrier');
         }
         else
         {
@@ -65,20 +66,40 @@ function ProcessText(input) {
             错误原因: ${e.reason}
             位置: 第 ${e.mark.line + 1} 行
         `;
+        loadIcon('barrier');
         console.error(e); // 在控制台也打印一下方便调试
     }
     return output
 }
 
 function itemParse(key, value)
-{
+{   
     if(typeof value === 'object' && value !== null) 
     {
+
         if(Object.hasOwn(value, 'display')) {
+            // 图标处理
+            const Icon = document.getElementById('pixelIcon');
+            if(Object.hasOwn(value.display, 'material')) {
+                var mat = value.display.material;
+                loadIcon(mat);
+            }
             if(Object.hasOwn(value.display, 'lore')) {
                 const loreArray = value.display.lore;
                 console.log(loreArray);
             }
         }
     }
+}
+
+function loadIcon(material) {
+    const Icon = document.getElementById('pixelIcon');
+    var mat = material;
+    mat = mat.replaceAll(' ', '_').toLowerCase();
+    const newSrc = `https://assets.mcasset.cloud/1.20.1/assets/minecraft/textures/item/${mat}.png`;
+    const defaultSrc = `https://assets.mcasset.cloud/1.20.1/assets/minecraft/textures/item/barrier.png`;
+    let tmpImage = new Image();
+    tmpImage.onload = () => { Icon.src = newSrc; };
+    tmpImage.onerror = () => { Icon.src = defaultSrc; };
+    tmpImage.src = newSrc;
 }

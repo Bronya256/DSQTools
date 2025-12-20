@@ -176,3 +176,19 @@ p {
     width: 100%;
     top: 5%;
 }
+
+.pixel-icon {
+    /* 1. 设置想要显示的大小 (比如放大到 64x64) */
+    width: 64px; 
+    height: 64px;
+
+    /* 4. 关键：无损放大（抗锯齿/像素化） */
+    image-rendering: -moz-crisp-edges; /* Firefox */
+    image-rendering: -o-crisp-edges;   /* Opera */
+    image-rendering: -webkit-optimize-contrast; /* Webkit (non-standard naming) */
+    image-rendering: pixelated;        /* 标准属性：Chrome, Edge, Safari */
+    -ms-interpolation-mode: nearest-neighbor; /* IE (Optional) */
+    
+    /* 确保图片填充模式正确 */
+    object-fit: cover; 
+  }
