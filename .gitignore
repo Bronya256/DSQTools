@@ -145,3 +145,4 @@ vite.config.ts.timestamp-*
 .st*
 
 pushScript.bat
+nodejs.js

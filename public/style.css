@@ -177,6 +177,7 @@ p {
     top: 5%;
 }
 
+/* 展示盒子样式 */
 .pixel-icon {
     /* 1. 设置想要显示的大小 (比如放大到 64x64) */
     width: 64px; 
@@ -191,4 +192,33 @@ p {
     
     /* 确保图片填充模式正确 */
     object-fit: cover; 
-  }
+}
+.ouputContainer {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+}
+.nav-btn {
+    background: rgba(0, 0, 0 , 0.2);
+    border: none;
+    color: white;
+    font-size: 24px;
+    padding: 10px;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s;
+    user-select: none;
+}
+
+.nav-btn:hover {
+    background: rgba(0, 0, 0, 0.4);
+}
+.prev { margin-right: 10px; }
+.next { margin-left: 10px; }

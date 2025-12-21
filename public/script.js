@@ -1,100 +1,138 @@
 import yaml from 'js-yaml';
-// const fs = require('fs');
+
+// 读取页面元素
 const TrmText = document.getElementById('trmText');
 const outputBox = document.getElementById('ouputBox');
-// 1. 找到那个按钮
 const button = document.getElementById('myButton');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
 
-// 2. 监听“点击”事件
+let slidesData = []; // 轮播数据
+let currentSlideIndex = 0;
+
+// 处理按钮点击：解析文本并触发显示
 button.addEventListener('click', function() {
-    
-    // 如果按钮正在动，就先别打断它
     if (button.classList.contains('bounce')) return;
 
-    // 添加 'bounce' 类名，开始动画
     button.classList.add('bounce');
 
-    // 更改按钮文字
     const originalText = button.innerText;
-    button.innerText = "操！走！ 🏀";
+    button.innerText = '处理中... 🕗';
 
-    // outputBox处理
-    const Text = ProcessText(TrmText.value);
-    outputBox.innerText = `正在处理以下配置文件...\n\n${Text}\n\n处理完成！🎉`;
+    ProcessText(TrmText.value);
+
     document.getElementById('outputCard').hidden = false;
-
-    // 让 outputBox 显示
     outputBox.hidden = false;
     outputBox.style.display = 'block';
-    // 淡入效果（需要在 CSS 中支持或允许内联 transition）
     outputBox.style.opacity = 0;
     requestAnimationFrame(() => {
         outputBox.style.transition = 'opacity 300ms ease';
         outputBox.style.opacity = 1;
     });
 
-    // 3. 监听动画结束事件
     button.addEventListener('animationend', function() {
         button.classList.remove('bounce');
-        button.innerText = originalText; // 恢复文字
+        button.innerText = originalText;
     }, { once: true });
 });
 
+prevBtn.addEventListener('click', () => changeSlide(-1));
+nextBtn.addEventListener('click', () => changeSlide(1));
+
+// 主流程：把 YAML 文本解析成 slidesData
 function ProcessText(input) {
-    var output = "什么都没有！";
+    slidesData = [];
+    currentSlideIndex = 0;
+
     try {
-        // 2. 尝试解析
         const result = yaml.load(input);
-        
-        // 3. 解析成功：检查是否为 undefined (例如只写了注释)
-        if (!result) { 
-            output = '没有数据吗我问一嘴';
+
+        if (!result) {
+            outputBox.innerText = '没有数据哦？';
             loadIcon('barrier');
+            hideNav();
+            return;
         }
-        else
-        {
-            console.log(result);
-            for(const [key, value] of Object.entries(result)) itemParse(key, value);
-            
-            // 4. 渲染数据
-            output = `${JSON.stringify(result, null, 2)}`;
+
+        for (const [key, value] of Object.entries(result)) {
+            itemParse(key, value);
         }
+
+        renderSlides();
     } catch (e) {
-        // 5. 解析失败：优雅地提示用户
-        output = `
-            解析出错啦 (＞﹏＜)
-            错误原因: ${e.reason}
-            位置: 第 ${e.mark.line + 1} 行
-        `;
+        outputBox.innerText = `解析出错啦！\n原因: ${e.reason}\n位置: 第${e.mark ? e.mark.line + 1 : '?'}行`;
         loadIcon('barrier');
-        console.error(e); // 在控制台也打印一下方便调试
+        hideNav();
+        console.error(e);
     }
-    return output
 }
 
-function itemParse(key, value)
-{   
-    if(typeof value === 'object' && value !== null) 
-    {
+// 解析单个物品，收集 Display 下的 name / lore / material
+function itemParse(key, value) {
+    if (typeof value !== 'object' || value === null) return;
 
-        if(Object.hasOwn(value, 'display')) {
-            // 图标处理
-            const Icon = document.getElementById('pixelIcon');
-            if(Object.hasOwn(value.display, 'material')) {
-                var mat = value.display.material;
-                loadIcon(mat);
-            }
-            if(Object.hasOwn(value.display, 'lore')) {
-                const loreArray = value.display.lore;
-                console.log(loreArray);
-            }
-        }
+    const display = value.Display || value.display;
+    if (!display) return;
+
+    const material = display.material || display.Material || value.material || 'barrier';
+    const rawName = display.name || display.Name || key;
+    const loreArray = display.lore || display.Lore || [];
+
+    const loreLines = Array.isArray(loreArray)
+        ? loreArray.map(line => cleanColorCodes(String(line)))
+        : [cleanColorCodes(String(loreArray))];
+
+    slidesData.push({
+        name: cleanColorCodes(String(rawName)),
+        lore: loreLines,
+        material
+    });
+}
+
+// 根据 slidesData 渲染当前要展示的内容
+function renderSlides() {
+    if (slidesData.length === 0) {
+        outputBox.innerText = '解析成功，但没有可展示的物品。';
+        hideNav();
+        return;
     }
+
+    prevBtn.style.display = slidesData.length > 1 ? 'flex' : 'none';
+    nextBtn.style.display = slidesData.length > 1 ? 'flex' : 'none';
+
+    showSlide(currentSlideIndex);
+}
+
+function showSlide(index) {
+    if (slidesData.length === 0) return;
+
+    currentSlideIndex = (index + slidesData.length) % slidesData.length;
+    const slide = slidesData[currentSlideIndex];
+
+    loadIcon(slide.material);
+
+    const loreText = slide.lore.join('\n');
+    outputBox.innerText = `${slide.name}\n${loreText}`;
+}
+
+function changeSlide(direction) {
+    if (slidesData.length === 0) return;
+    showSlide(currentSlideIndex + direction);
+}
+
+// 隐藏左右切换按钮
+function hideNav() {
+    prevBtn.style.display = 'none';
+    nextBtn.style.display = 'none';
+}
+
+function cleanColorCodes(text) {
+    return text ? text.replace(/&[0-9a-fk-or]/gi, '') : '';
 }
 
 function loadIcon(material) {
     const Icon = document.getElementById('pixelIcon');
-    var mat = material;
+    let mat = material;
     mat = mat.replaceAll(' ', '_').toLowerCase();
     const newSrc = `https://assets.mcasset.cloud/1.20.1/assets/minecraft/textures/item/${mat}.png`;
     const defaultSrc = `https://assets.mcasset.cloud/1.20.1/assets/minecraft/textures/item/barrier.png`;
