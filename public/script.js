@@ -1,4 +1,5 @@
 import yaml from 'js-yaml';
+import { autoToHTML } from '@sfirew/minecraft-motd-parser';
 
 // 读取页面元素
 const TrmText = document.getElementById('trmText');
@@ -50,7 +51,6 @@ function ProcessText(input) {
         if (!result) {
             outputBox.innerText = '没有数据哦？';
             loadIcon('barrier');
-            hideNav();
             return;
         }
 
@@ -62,7 +62,6 @@ function ProcessText(input) {
     } catch (e) {
         outputBox.innerText = `解析出错啦！\n原因: ${e.reason}\n位置: 第${e.mark ? e.mark.line + 1 : '?'}行`;
         loadIcon('barrier');
-        hideNav();
         console.error(e);
     }
 }
@@ -74,16 +73,18 @@ function itemParse(key, value) {
     const display = value.Display || value.display;
     if (!display) return;
 
-    const material = display.material || display.Material || value.material || 'barrier';
-    const rawName = display.name || display.Name || key;
+    const material = display.material || display.Material || 'barrier';
+    var rawName = display.name || display.Name ;
+    rawName = autoToHTML(formattedText(String(rawName)));
     const loreArray = display.lore || display.Lore || [];
 
+    // 处理 lore，确保是数组形式
     const loreLines = Array.isArray(loreArray)
-        ? loreArray.map(line => cleanColorCodes(String(line)))
-        : [cleanColorCodes(String(loreArray))];
+        ? loreArray.map(line => autoToHTML(formattedText(String(line))))
+        : [autoToHTML(formattedText(loreArray[0] || ''))];
 
     slidesData.push({
-        name: cleanColorCodes(String(rawName)),
+        name: formattedText(String(rawName)),
         lore: loreLines,
         material
     });
@@ -93,7 +94,6 @@ function itemParse(key, value) {
 function renderSlides() {
     if (slidesData.length === 0) {
         outputBox.innerText = '解析成功，但没有可展示的物品。';
-        hideNav();
         return;
     }
 
@@ -111,8 +111,10 @@ function showSlide(index) {
 
     loadIcon(slide.material);
 
-    const loreText = slide.lore.join('\n');
-    outputBox.innerText = `${slide.name}\n${loreText}`;
+    const loreText = slide.lore.join('<br>');
+    console.log(loreText);
+    document.getElementById('itemName').innerHTML = slide.name;
+    document.getElementById('itemLore').innerHTML = loreText;
 }
 
 function changeSlide(direction) {
@@ -120,14 +122,8 @@ function changeSlide(direction) {
     showSlide(currentSlideIndex + direction);
 }
 
-// 隐藏左右切换按钮
-function hideNav() {
-    prevBtn.style.display = 'none';
-    nextBtn.style.display = 'none';
-}
-
-function cleanColorCodes(text) {
-    return text ? text.replace(/&[0-9a-fk-or]/gi, '') : '';
+function formattedText(text) {
+    return text ? text.replace(/&/g, '§') : '';
 }
 
 function loadIcon(material) {

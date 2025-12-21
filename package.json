@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@sfirew/minecraft-motd-parser": "^1.1.6",
     "express": "^5.1.0",
     "js-yaml": "^4.1.1"
   },
