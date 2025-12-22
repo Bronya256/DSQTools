@@ -222,3 +222,7 @@ p {
 }
 .prev { margin-right: 10px; }
 .next { margin-left: 10px; }
+
+[hidden] {
+    display: none !important;
+}

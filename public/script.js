@@ -4,7 +4,7 @@ import { autoToHTML } from '@sfirew/minecraft-motd-parser';
 // 读取页面元素
 const TrmText = document.getElementById('trmText');
 const outputBox = document.getElementById('ouputBox');
-const button = document.getElementById('myButton');
+const myButton = document.getElementById('myButton');
 const prevBtn = document.getElementById('prevBtn');
 const nextBtn = document.getElementById('nextBtn');
 
@@ -12,17 +12,19 @@ let slidesData = []; // 轮播数据
 let currentSlideIndex = 0;
 
 // 处理按钮点击：解析文本并触发显示
-button.addEventListener('click', function() {
-    if (button.classList.contains('bounce')) return;
+myButton.addEventListener('click', function() {
+    if (myButton.classList.contains('bounce')) return;
 
-    button.classList.add('bounce');
+    myButton.classList.add('bounce');
 
-    const originalText = button.innerText;
-    button.innerText = '处理中... 🕗';
+    const originalText = myButton.innerText;
+    myButton.innerText = '处理中... 🕗';
 
     ProcessText(TrmText.value);
 
+    // 显示结果区域
     document.getElementById('outputCard').hidden = false;
+    document.getElementById('advancedPanel').hidden = false;
     outputBox.hidden = false;
     outputBox.style.display = 'block';
     outputBox.style.opacity = 0;
@@ -31,14 +33,14 @@ button.addEventListener('click', function() {
         outputBox.style.opacity = 1;
     });
 
-    button.addEventListener('animationend', function() {
-        button.classList.remove('bounce');
-        button.innerText = originalText;
+    myButton.addEventListener('animationend', function() {
+        myButton.classList.remove('bounce');
+        myButton.innerText = originalText;
     }, { once: true });
 });
 
-prevBtn.addEventListener('click', () => changeSlide(-1));
-nextBtn.addEventListener('click', () => changeSlide(1));
+prevBtn.addEventListener('click', () => showSlide(currentSlideIndex - 1));
+nextBtn.addEventListener('click', () => showSlide(currentSlideIndex + 1));
 
 // 主流程：把 YAML 文本解析成 slidesData
 function ProcessText(input) {
@@ -117,11 +119,6 @@ function showSlide(index) {
     document.getElementById('itemLore').innerHTML = loreText;
 }
 
-function changeSlide(direction) {
-    if (slidesData.length === 0) return;
-    showSlide(currentSlideIndex + direction);
-}
-
 function formattedText(text) {
     return text ? text.replace(/&/g, '§') : '';
 }
@@ -132,6 +129,7 @@ function loadIcon(material) {
     mat = mat.replaceAll(' ', '_').toLowerCase();
     const newSrc = `https://assets.mcasset.cloud/1.20.1/assets/minecraft/textures/item/${mat}.png`;
     const defaultSrc = `https://assets.mcasset.cloud/1.20.1/assets/minecraft/textures/item/barrier.png`;
+
     let tmpImage = new Image();
     tmpImage.onload = () => { Icon.src = newSrc; };
     tmpImage.onerror = () => { Icon.src = defaultSrc; };

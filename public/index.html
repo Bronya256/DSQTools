@@ -56,6 +56,35 @@
       </div>
     </div>
 
+    <!-- 修改组件 -->
+    <!-- 默认 hidden，点击上面的按钮后才会显示 -->
+    <div id="advancedPanel" hidden style="flex-direction: row; display: flex; justify-content: center; align-items: stretch; width: 100%; flex-wrap: wrap; margin-top: 20px;">
+        
+        <!-- 组件 A：修改操作 -->
+        <div id="changeBoxA" class="card" style="flex: 1; min-width: 300px;">
+            <h2>🛠️ 修改操作 </h2>
+            <p>修改当前展示的物品属性</p>
+            
+            <div style="text-align: left; margin-bottom: 10px;">
+                <label style="display:block; margin-bottom:5px; color:#ddd;">修改材质 ID:</label>
+                <input type="text" id="modifyMaterial" class="TrmInput" style="height: 40px; margin-bottom: 15px;" placeholder="例如: diamond_sword" />
+                
+                <label style="display:block; margin-bottom:5px; color:#ddd;">修改显示名称:</label>
+                <input type="text" id="modifyName" class="TrmInput" style="height: 40px;" placeholder="支持 & 颜色代码" />
+            </div>
+
+            <button id="applyBtn" class="action-btn" style="background-color: #4facfe;">应用修改并导出 👉</button>
+        </div>
+
+        <!-- 组件 B：结果导出 -->
+        <div id="changeBoxB" class="card" style="flex: 1; min-width: 300px;">
+            <h2>🛠️ 结果导出 </h2>
+            <p>严格缩进的 YAML 结果</p>
+            <textarea id="yamlOutput" class="TrmInput" style="height: 250px; font-family: 'JetBrains Mono', monospace;" readonly placeholder="等待生成..."></textarea>
+        </div>
+
+    </div>
+
     <div class="footer">
         &copy; 2025 中二病也要打手枪！
     </div>
