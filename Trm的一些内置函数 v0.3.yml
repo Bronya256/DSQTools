@@ -1,0 +1,51 @@
+
+Functions:
+  loreCheck: |-
+    function loreCheck()
+    {
+      // 针对cmi用户元数据的检查
+      // 传入参数 arg0是预定数额，arg1是指定的键值对(输入key返回value)，arg2是显示的文字
+      var arg1 = 0;
+      // 根据传入参数 args[3] 来决定如何获取arg1的值
+      switch (args[3])
+      {
+        case "usermeta":
+        {
+          arg1 = varInt("%cmi_user_meta_" + args[1] + "%");
+          break;
+        }
+        case "ni":
+        {
+          arg1 = varInt("%checkitem_amount_nbtstrings:NeigeItems..id=" + args[1] + "%");
+          break;
+        }
+        case "level":
+        {
+          arg1 = varInt("%player_level%");
+          break;
+        }
+        case "money":
+        {
+          arg1 = Number( vars("%cmi_user_balance%") );
+          arg1 = arg1.toFixed(2); // 保留两位小数
+          break;
+        }
+        case "nbt":
+        {
+          arg1 = varInt("%checkitem_amount_nbtstrings:" + args[1] + "%");
+          break;
+        }
+      }
+      var returnStr = " &f  ";
+      if( arg1 >= parseInt(args[0]) )
+      {
+        returnStr += "&a&l✔&r " + args[2] + " &7(&a" + arg1 + "&7/" + args[0] + ")";
+      }
+      else
+      {
+        returnStr += "&c✘&r " + args[2] + " &7(&a" + arg1 + "&7/" + args[0] + ")";
+      }
+      
+      return returnStr;
+    }
+    loreCheck();

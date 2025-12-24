@@ -7,6 +7,8 @@ const outputBox = document.getElementById('ouputBox');
 const myButton = document.getElementById('myButton');
 const prevBtn = document.getElementById('prevBtn');
 const nextBtn = document.getElementById('nextBtn');
+const applyBtn = document.getElementById('applyBtn');
+const errMessage = document.getElementById('errMessage');
 
 let slidesData = []; // 轮播数据
 let currentSlideIndex = 0;
@@ -21,10 +23,10 @@ myButton.addEventListener('click', function() {
     myButton.innerText = '处理中... 🕗';
 
     ProcessText(TrmText.value);
+    // console.log(TrmText.value);
 
     // 显示结果区域
     document.getElementById('outputCard').hidden = false;
-    document.getElementById('advancedPanel').hidden = false;
     outputBox.hidden = false;
     outputBox.style.display = 'block';
     outputBox.style.opacity = 0;
@@ -39,19 +41,24 @@ myButton.addEventListener('click', function() {
     }, { once: true });
 });
 
+applyBtn.addEventListener('click', function() {
+    // TODO: 读取
+});
+
 prevBtn.addEventListener('click', () => showSlide(currentSlideIndex - 1));
 nextBtn.addEventListener('click', () => showSlide(currentSlideIndex + 1));
 
 // 主流程：把 YAML 文本解析成 slidesData
 function ProcessText(input) {
+    errMessage.hidden = true;
     slidesData = [];
     currentSlideIndex = 0;
-
     try {
         const result = yaml.load(input);
 
         if (!result) {
-            outputBox.innerText = '没有数据哦？';
+            errMessage.hidden = false;
+            errMessage.innerText = '没有数据哦？';
             loadIcon('barrier');
             return;
         }
@@ -60,24 +67,30 @@ function ProcessText(input) {
             itemParse(key, value);
         }
 
+        document.getElementById('advancedPanel').hidden = false;
         renderSlides();
     } catch (e) {
-        outputBox.innerText = `解析出错啦！\n原因: ${e.reason}\n位置: 第${e.mark ? e.mark.line + 1 : '?'}行`;
+        errMessage.hidden = false;
+        errMessage.innerText = `解析出错啦！\n原因: ${e.reason}\n位置: 第${e.mark ? e.mark.line + 1 : '?'}行`;
         loadIcon('barrier');
         console.error(e);
     }
 }
 
 // 解析单个物品，收集 Display 下的 name / lore / material
+// slidesData存入原始数据
 function itemParse(key, value) {
     if (typeof value !== 'object' || value === null) return;
 
     const display = value.Display || value.display;
     if (!display) return;
 
-    const material = display.material || display.Material || 'barrier';
-    var rawName = display.name || display.Name ;
-    rawName = autoToHTML(formattedText(String(rawName)));
+    slidesData.push({
+        keyName: key,
+        name: display.name || display.Name || '',
+        lore: display.lore || display.Lore || [],
+        material: display.material || display.Material || 'barrier'
+    });
     const loreArray = display.lore || display.Lore || [];
 
     // 处理 lore，确保是数组形式
@@ -85,17 +98,14 @@ function itemParse(key, value) {
         ? loreArray.map(line => autoToHTML(formattedText(String(line))))
         : [autoToHTML(formattedText(loreArray[0] || ''))];
 
-    slidesData.push({
-        name: formattedText(String(rawName)),
-        lore: loreLines,
-        material
-    });
 }
 
 // 根据 slidesData 渲染当前要展示的内容
 function renderSlides() {
     if (slidesData.length === 0) {
-        outputBox.innerText = '解析成功，但没有可展示的物品。';
+
+        errMessage.hidden = false;
+        errMessage.innerText = '解析成功，但没有可展示的物品。';
         return;
     }
 
@@ -113,9 +123,15 @@ function showSlide(index) {
 
     loadIcon(slide.material);
 
-    const loreText = slide.lore.join('<br>');
+    var newLore = [];
+    if(slide.lore.length > 0 && typeof slide.lore[0] == 'string') 
+        newLore = slide.lore.map(line => autoToHTML(formattedText(line)));
+    else if(slide.lore.length > 0 && Array.isArray(slide.lore))
+        newLore = slide.lore[0].map(line => autoToHTML(formattedText(line)));
+    const loreText = newLore.join('<br>');
     console.log(loreText);
-    document.getElementById('itemName').innerHTML = slide.name;
+    document.getElementById('currentItemName').innerText = '当前物品键: ' + slide.keyName;
+    document.getElementById('itemName').innerHTML = autoToHTML(formattedText(slide.name));
     document.getElementById('itemLore').innerHTML = loreText;
 }
 
@@ -135,3 +151,4 @@ function loadIcon(material) {
     tmpImage.onerror = () => { Icon.src = defaultSrc; };
     tmpImage.src = newSrc;
 }
+
