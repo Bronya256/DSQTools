@@ -63,12 +63,16 @@
     <div id="advancedPanel" hidden style="flex-direction: row; display: flex; justify-content: center; align-items: stretch; width: 100%; flex-wrap: wrap; margin-top: 20px;">
         
         <!-- 组件 A：修改操作 -->
-        <div id="changeBoxA" class="card" style="flex: 1; min-width: 300px;">
+        <div id="changeBoxA" class="card" style="display: flex; flex-direction: column; flex: 1; min-width: 300px;">
             <h2>🛠️ 修改操作 </h2>
             
             <h3 style="display:block; margin: 20px; color:#ffffff; text-align: center;" id="currentItemName">什么都没有哟？</h3>
             <div id="changeOpt"></div>
-            <button id="applyBtn" class="action-btn" style="background-color: #4facfe;">应用修改并导出 👉</button>
+            <div style="margin-top: auto;">
+              <button id="plusCondition" class="action-btn" style="background-color: #fda085; margin-right: 20px; font-size: 20px;">➕添加属性</button>
+              <button id="applyBtn" class="action-btn" style="background-color: #4facfe;">导出 👉</button>
+            </div>
+            
         </div>
 
         <!-- 组件 B：结果导出 -->
