@@ -1,0 +1,101 @@
+
+
+/* 改SELECT咯 */
+
+select {
+    /* 这一行是关键，去掉了系统默认的下拉箭头和丑边框 */
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    
+    padding-right: 45px; /* 给右侧留出空间放箭头 */
+    outline: none;
+    cursor: pointer;
+    font-family: inherit;
+    /* 【核心修改 2】：文字太长怎么办？ */
+    /* 强制不换行，超出部分显示省略号 (...) */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+option {
+    background: #333; /* 下拉菜单背景只能是纯色 */
+    color: white;
+}
+/* =========================================
+    风格 1: 现代透光风 (保持不变)
+    ========================================= */
+.select-modern-wrapper { position: relative; }
+.select-modern {
+    padding: 12px 45px 12px 20px;
+    font-size: 16px;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+.select-modern:hover {
+    background: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+}
+.select-modern:focus {
+    border-color: #ff6b6b;
+    box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.25);
+}
+.select-modern-wrapper::after {
+    content: "▼"; font-size: 12px; color: rgba(255, 255, 255, 0.7);
+    position: absolute; right: 15px; top: 50%; transform: translateY(-50%); pointer-events: none;
+}
+.select-mc-wrapper {
+    position: relative;
+    image-rendering: pixelated; /* 像素化渲染 */
+}
+/* =========================================
+    风格 2: Minecraft 石头按钮风 (已强化打击感)
+    ========================================= */
+.select-mc {
+    padding: 10px 45px 10px 15px; /* 把右侧 padding 交给通用样式处理 */
+    font-size: 16px;
+    color: #fff;
+    text-shadow: 2px 2px 0px #3f3f3f; /* 文字阴影 */
+    
+    /* MC 经典灰 */
+    background-color: #8b8b8b;
+    
+    /* 利用 border 模拟 3D 凸起效果 */
+    border-top: 4px solid #ffffff;
+    border-left: 4px solid #ffffff;
+    border-right: 4px solid #555555;
+    border-bottom: 4px solid #555555;
+    border-radius: 0; /* MC不需要圆角 */
+    transition: all 0s linear 0.15s;
+}
+
+/* 修改处：去掉了 :focus，只保留 :active */
+/* 这样只有当鼠标按住时才会显示“凹陷”效果，松开即回弹 */
+.select-mc:active {
+    border-top: 4px solid #555555;
+    border-left: 4px solid #555555;
+    border-right: 4px solid #ffffff;
+    border-bottom: 4px solid #ffffff;
+    background-color: #757575;
+
+    transition: none;
+}
+
+/* MC 风格箭头 */
+.select-mc-wrapper::after {
+    content: "";
+    position: absolute;
+    right: 15px;
+    top: 22px;
+    /* 用 border 画一个像素三角形 */
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid #fff;
+    pointer-events: none;
+}

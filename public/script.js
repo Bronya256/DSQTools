@@ -148,45 +148,45 @@ function refreshChangeOpt() {
     const slide = slidesData[currentSlideIndex];
     if (!slide) return;
 
-    // let parsed;
-    // try {
-    //     parsed = yaml.load(TrmText.value) || {};
-    // } catch (e) {
-    //     console.error('解析对象失败！', e);
-    //     return;
-    // }
+    let parsed;
+    try {
+        parsed = yaml.load(TrmText.value) || {};
+    } catch (e) {
+        console.error('解析对象失败！', e);
+        return;
+    }
 
-    // const itemStack = parsed[slide.keyName];
-    // if (!itemStack || typeof itemStack !== 'object') return;
+    const itemStack = parsed[slide.keyName];
+    if (!itemStack || typeof itemStack !== 'object') return;
 
-    // const fragment = document.createDocumentFragment();
-    // const addTag = (label, value) => {
-    //     if (value === undefined || value === null || value === '') return;
-    //     const tag = document.createElement('span');
-    //     const displayValue = typeof value === 'string' ? value : JSON.stringify(value);
-    //     tag.textContent = `${label}: ${displayValue}`;
-    //     tag.style.display = 'inline-block';
-    //     tag.style.margin = '4px';
-    //     tag.style.padding = '6px 10px';
-    //     tag.style.background = 'rgba(0, 0, 0, 0.25)';
-    //     tag.style.borderRadius = '12px';
-    //     fragment.appendChild(tag);
-    // };
+    const fragment = document.createDocumentFragment();
+    const addTag = (label, value) => {
+        if (value === undefined || value === null || value === '') return;
+        const tag = document.createElement('span');
+        const displayValue = typeof value === 'string' ? value : JSON.stringify(value);
+        tag.textContent = `${label}: ${displayValue}`;
+        tag.style.display = 'inline-block';
+        tag.style.margin = '4px';
+        tag.style.padding = '6px 10px';
+        tag.style.background = 'rgba(0, 0, 0, 0.25)';
+        tag.style.borderRadius = '12px';
+        fragment.appendChild(tag);
+    };
 
-    // if (typeof itemStack.shiny == 'string') {
-    //     addTag('shiny', itemStack.shiny);
-    // }
+    if (typeof itemStack.shiny == 'string') {
+        addTag('shiny', itemStack.shiny);
+    }
 
-    // const actions = itemStack.actions;
-    // if (actions && typeof actions === 'object') {
-    //     Object.entries(actions).forEach(([actionKey, actionValue]) => {
-    //         addTag(actionKey, actionValue);
-    //         if (actionValue && typeof actionValue === 'object') {
-    //             if (actionValue.condition !== undefined) addTag(`${actionKey} condition`, actionValue.condition);
-    //             if (actionValue.actions !== undefined) addTag(`${actionKey} actions`, actionValue.actions);
-    //         }
-    //     });
-    // }
+    const actions = itemStack.actions;
+    if (actions && typeof actions === 'object') {
+        Object.entries(actions).forEach(([actionKey, actionValue]) => {
+            addTag(actionKey, actionValue);
+            if (actionValue && typeof actionValue === 'object') {
+                if (actionValue.condition !== undefined) addTag(`${actionKey} condition`, actionValue.condition);
+                if (actionValue.actions !== undefined) addTag(`${actionKey} actions`, actionValue.actions);
+            }
+        });
+    }
 
     changeOpt.appendChild(fragment);
 }
