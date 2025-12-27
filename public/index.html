@@ -25,6 +25,7 @@
     </script> -->
 
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="changeBoxCSS.css">
     <link rel="stylesheet" href="select.css">
     <script type="module" src="script.js"></script>
 </head>
@@ -63,16 +64,70 @@
     <div id="advancedPanel" hidden style="flex-direction: row; display: flex; justify-content: center; align-items: stretch; width: 100%; flex-wrap: wrap; margin-top: 20px;">
         
         <!-- 组件 A：修改操作 -->
-        <div id="changeBoxA" class="card" style="display: flex; flex-direction: column; flex: 1; min-width: 300px;">
-            <h2>🛠️ 修改操作 </h2>
+        <div id="changeBoxA" class="card" style="display: flex; flex-direction: column; flex: 1; min-width: 400px;">
+            <h2>🛠️ 修改 </h2>
             
             <h3 style="display:block; margin: 20px; color:#ffffff; text-align: center;" id="currentItemName">什么都没有哟？</h3>
-            <div id="changeOpt"></div>
-            <div style="margin-top: auto;">
-              <button id="plusCondition" class="action-btn" style="background-color: #fda085; margin-right: 20px; font-size: 20px;">➕添加属性</button>
-              <button id="applyBtn" class="action-btn" style="background-color: #4facfe;">导出 👉</button>
+            
+            <!-- ABC 区域 -->
+            <div class="control-row">
+                <!-- A: 删除按钮 -->
+                <button id="delPropBtn" class="action-btn small-btn delete-btn" title="删除当前选中的条件">🗑️</button>
+                
+                <!-- B: 选择属性 (Select 组件) -->
+                <div style="flex: 1; margin: 0 10px; display: flex; flex-direction: column;">
+                    <div class="select-modern-wrapper">
+                        <select id="propSelect" class="select-modern">
+                            <!-- 动态添加 Option -->
+                        </select>
+                    </div>
+                    <!-- 类型显示小组件 -->
+                    <div id="propTypeDisplay" class="prop-type-label">Type: Unknown</div>
+                </div>
+
+                <!-- C: 保存按钮 -->
+                <button id="savePropBtn" class="action-btn small-btn save-btn" title="保存修改回对象">💾</button>
             </div>
             
+            <!-- S2: 可选组件 (Select) -->
+            <div id="conditionSelectWrapper" class="select-modern-wrapper" hidden style="margin-top: 10px; width: 100%;">
+                <select id="conditionSelect" class="select-modern" style="width: 100%;">
+                    <!-- 动态解析出的条件 -->
+                </select>
+            </div>
+
+            <!-- D2: 展示/修改文本组件 -->
+            <div id="detailEditor" class="editor-box">
+                <p id="emptyDetailTip" style="margin: 0; color: #aaa;">未解析到材料需求</p>
+                
+                <div id="detailForm" hidden>
+                    <div class="editor-field">
+                        <label>类型 (Type)</label>
+                        <select id="editType" class="editor-input"></select>
+                    </div>
+                    <div class="editor-field">
+                        <label>材料名称 (Name)</label>
+                        <input id="editName" class="editor-input">
+                    </div>
+                    <div>
+                        <label>材料键名 (Key)</label>
+                        <input id="editKey" class="editor-input">
+                    </div>
+                     <div class="editor-field">
+                        <label>条件 (Amount/Value)</label>
+                        <input id="editAmount" class="editor-input" type="number">
+                    </div>
+                    <div class="editor-field">
+                        <label>原始逻辑 (Logic)</label>
+                        <input id="editLogic" class="editor-input" readonly style="font-size: 10px; opacity: 0.7;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 增加按钮 -->
+            <div style="margin-top: auto; padding-top: 20px;">
+              <button id="plusCondition" class="action-btn" style="background-color: #fda085; width: 100%;">➕ 添加新条件</button>
+            </div>
         </div>
 
         <!-- 组件 B：结果导出 -->

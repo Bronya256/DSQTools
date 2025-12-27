@@ -1,0 +1,81 @@
+
+/* 新增：横向控制栏 */
+.control-row {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start; /* 顶部对齐 */
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 10px;
+    gap: 10px;
+}
+
+/* 小按钮样式 */
+.small-btn {
+    padding: 10px 15px;
+    font-size: 16px;
+    border-radius: 12px; /* 方一点 */
+    min-width: 50px;
+}
+
+.delete-btn {
+    background-color: #ff4757;
+}
+.delete-btn:hover { background-color: #ff6b81; }
+
+.save-btn {
+    background-color: #2ed573;
+}
+.save-btn:hover { background-color: #7bed9f; }
+
+/* 属性类型标签 */
+.prop-type-label {
+    font-size: 12px;
+    color: rgba(255,255,255,0.7);
+    margin-top: 4px;
+    text-align: center;
+    background: rgba(0,0,0,0.2);
+    padding: 2px 8px;
+    border-radius: 8px;
+    display: inline-block;
+}
+
+/* D2 编辑区域样式 */
+.editor-box {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    padding: 15px;
+    margin-top: 10px;
+    text-align: left;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.editor-field {
+    margin-bottom: 10px;
+}
+
+.editor-field label {
+    display: block;
+    font-size: 12px;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 4px;
+}
+
+.editor-input {
+    width: 100%;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 6px;
+    padding: 6px;
+    color: white;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.editor-input:focus {
+    border-color: #74ebd5;
+    background: rgba(255,255,255,0.15);
+}

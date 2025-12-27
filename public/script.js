@@ -42,9 +42,6 @@ myButton.addEventListener('click', function() {
     }, { once: true });
 });
 
-applyBtn.addEventListener('click', function() {
-});
-
 prevBtn.addEventListener('click', () => showSlide(currentSlideIndex - 1));
 nextBtn.addEventListener('click', () => showSlide(currentSlideIndex + 1));
 
