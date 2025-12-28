@@ -42,6 +42,19 @@ myButton.addEventListener('click', function() {
     }, { once: true });
 });
 
+pixelIcon.addEventListener('click', function() {
+    // 只有当有数据的时候才弹出来
+    if (slidesData.length > 0) {
+        detailOverlay.hidden = false;
+    }
+});
+
+// 新增：点击弹窗遮罩层（或者任意位置）关闭弹窗喵
+detailOverlay.addEventListener('click', function(e) {
+    // 无论点哪里都关闭吧，体验更流畅喵
+    detailOverlay.hidden = true;
+});
+
 prevBtn.addEventListener('click', () => showSlide(currentSlideIndex - 1));
 nextBtn.addEventListener('click', () => showSlide(currentSlideIndex + 1));
 
@@ -88,12 +101,6 @@ function itemParse(key, value) {
         lore: display.lore || display.Lore || [],
         material: display.material || display.Material || 'barrier'
     });
-    const loreArray = display.lore || display.Lore || [];
-
-    // 处理 lore，确保是数组形式
-    const loreLines = Array.isArray(loreArray)
-        ? loreArray.map(line => autoToHTML(formattedText(String(line))))
-        : [autoToHTML(formattedText(loreArray[0] || ''))];
 
 }
 

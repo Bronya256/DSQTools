@@ -223,6 +223,57 @@ p {
 .prev { margin-right: 10px; }
 .next { margin-left: 10px; }
 
+#detailOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); /* 深色遮罩 */
+    backdrop-filter: blur(5px); /* 背景模糊 */
+    z-index: 9999; /* 保证在最上面 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* 进场动画 */
+    animation: fadeIn 0.3s ease;
+}
+
+#detailOverlay .detail-content {
+    /* 继承 card 样式，但做一些特化 */
+    max-width: 600px; /* 更宽一点 */
+    width: 85%;
+    max-height: 80vh; /* 防止太高超出屏幕 */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* 防止内容溢出圆角 */
+}
+
+/* Lore 滚动区域，防止Lore太长把屏幕撑爆 */
+.lore-scroll-container {
+    overflow-y: auto;
+    flex: 1;
+    padding: 10px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 10px;
+    /* 自定义滚动条 */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.3) transparent;
+}
+
+.lore-scroll-container::-webkit-scrollbar {
+    width: 6px;
+}
+.lore-scroll-container::-webkit-scrollbar-thumb {
+    background-color: rgba(255,255,255,0.3);
+    border-radius: 3px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
 [hidden] {
     display: none !important;
 }

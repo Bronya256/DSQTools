@@ -27,6 +27,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="changeBoxCSS.css">
     <link rel="stylesheet" href="select.css">
+    <script type="module" src="utils.js"></script>
     <script type="module" src="script.js"></script>
 </head>
 
@@ -46,16 +47,19 @@
       </div>
 
       <div class="card" id="outputCard" hidden="true">
-          <img id="pixelIcon" class="pixel-icon" src="https://assets.mcasset.cloud/1.20.1/assets/minecraft/textures/item/barrier.png" alt="物品图标" />
+          <img id="pixelIcon" class="pixel-icon" style="cursor: pointer;" src="https://assets.mcasset.cloud/1.20.1/assets/minecraft/textures/item/barrier.png" alt="物品图标" />
+          
           <div class="ouputContainer">
             <button class="nav-btn prev" id="prevBtn">❮</button>
             <div id="ouputBox" style="text-align: left;width: 100%;margin: 10px;" >
               <div id="errMessage" hidden></div>
-              <div id="itemName" style="text-align: center;"></div>
-              <div id="itemLore" style="white-space: pre-wrap; margin-top: 10px;"></div>
+              <div style="text-align: center; color: #ccc; font-size: 14px;">点击图标查看详情</div>
+              <!-- <div id="itemName" style="text-align: center;"></div>
+              <div id="itemLore" style="white-space: pre-wrap; margin-top: 10px;"></div> -->
             </div>
             <button class="nav-btn next" id="nextBtn">❯</button>
           </div>
+
       </div>
     </div>
 
@@ -141,6 +145,19 @@
     <div class="footer">
         &copy; 2025 中二病也要打手枪！
     </div>
+    
+    <!-- 新增：全屏详情弹窗组件喵 -->
+    <div id="detailOverlay" hidden>
+        <div class="detail-content card">
+            <h3 style="margin-bottom: 20px; color: #bbb;">物品详情预览</h3>
+            <div id="itemName" style="text-align: center; font-size: 1.5em; margin-bottom: 15px;"></div>
+            <div class="lore-scroll-container">
+                <div id="itemLore" style="white-space: pre-wrap; text-align: left;"></div>
+            </div>
+            <p style="margin-top: 20px; font-size: 12px; color: #aaa;">(再次点击任意空白处关闭喵)</p>
+        </div>
+    </div>
+
 </body>
 
 </html>
