@@ -1,5 +1,6 @@
 import yaml from 'js-yaml';
 import { autoToHTML } from '@sfirew/minecraft-motd-parser';
+// import { refreshPropSelect } from './editLogic.js';
 
 // 读取页面元素
 const TrmText = document.getElementById('trmText');
@@ -8,12 +9,33 @@ const myButton = document.getElementById('myButton');
 const prevBtn = document.getElementById('prevBtn');
 const nextBtn = document.getElementById('nextBtn');
 const errMessage = document.getElementById('errMessage');
-const changeOpt = document.getElementById('changeOpt');
 const pixelIcon = document.getElementById('pixelIcon');
 const detailOverlay = document.getElementById('detailOverlay');
 
 let slidesData = []; // 轮播数据
 let currentSlideIndex = 0;
+let globalParsedData = {}; // 存储整个YAML对象
+
+// 简简单单写俩导出函数
+export function getGlobalData() {
+    return {
+        globalParsedData,
+        currentSlideIndex,
+        slidesData
+    };
+}
+export function setGlobalData(newData) {
+    // 判断传入的对象里有没有这个属性，有的话就更新
+    if (newData.slidesData !== undefined) {
+        slidesData = newData.slidesData;
+    }
+    if (newData.currentSlideIndex !== undefined) {
+        currentSlideIndex = newData.currentSlideIndex;
+    }
+    if (newData.globalParsedData !== undefined) {
+        globalParsedData = newData.globalParsedData;
+    }
+}
 
 // 处理按钮点击：解析文本并触发显示
 myButton.addEventListener('click', function() {
@@ -74,6 +96,7 @@ function ProcessText(input) {
             return;
         }
         
+        globalParsedData = result; // 存储整个解析结果
         for (const [key, value] of Object.entries(result)) {
             itemParse(key, value);
         }
