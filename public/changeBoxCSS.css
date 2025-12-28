@@ -79,3 +79,23 @@
     border-color: #74ebd5;
     background: rgba(255,255,255,0.15);
 }
+.editor-select {
+    width: 100%;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 6px;
+    padding: 6px;
+    color: white;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    outline: none;
+    box-sizing: border-box;
+    cursor: pointer;
+    /* 不使用 appearance: none，保留默认箭头喵 */
+}
+
+/* 确保下拉选项背景为深色，不然白字看不见喵 */
+.editor-select option {
+    background-color: #333;
+    color: white;
+}

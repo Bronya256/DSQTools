@@ -3,13 +3,14 @@ import { autoToHTML } from '@sfirew/minecraft-motd-parser';
 
 // 读取页面元素
 const TrmText = document.getElementById('trmText');
-const outputBox = document.getElementById('ouputBox');
+const outputBox = document.getElementById('outputBox');
 const myButton = document.getElementById('myButton');
 const prevBtn = document.getElementById('prevBtn');
 const nextBtn = document.getElementById('nextBtn');
-const applyBtn = document.getElementById('applyBtn');
 const errMessage = document.getElementById('errMessage');
 const changeOpt = document.getElementById('changeOpt');
+const pixelIcon = document.getElementById('pixelIcon');
+const detailOverlay = document.getElementById('detailOverlay');
 
 let slidesData = []; // 轮播数据
 let currentSlideIndex = 0;
@@ -137,62 +138,9 @@ function showSlide(index) {
     document.getElementById('currentItemName').innerText = '当前物品键: ' + slide.keyName;
     document.getElementById('itemName').innerHTML = autoToHTML(formattedText(slide.name));
     document.getElementById('itemLore').innerHTML = loreText;
-    /** 
-     *  TODO: 获取当前正在展示的物品的key值，再从trmText中解析(itemStack = result.对应key)并修改对应属性
-     *  在changeOpt中加入标签，分别读取来自itemStack.shiny的字符串值，itemStack.actions的所有对象的<actionKey,actionValue>
-     *  再读actionValue读condition和actions这俩key（每次showSlide都刷新）
-     *  能读到的就添加标签，没读到的就算了
-    */
-    refreshChangeOpt();
-}
-
-function refreshChangeOpt() {
-    changeOpt.innerHTML = '';
-
-    const slide = slidesData[currentSlideIndex];
-    if (!slide) return;
-
-    let parsed;
-    try {
-        parsed = yaml.load(TrmText.value) || {};
-    } catch (e) {
-        console.error('解析对象失败！', e);
-        return;
-    }
-
-    const itemStack = parsed[slide.keyName];
-    if (!itemStack || typeof itemStack !== 'object') return;
-
-    const fragment = document.createDocumentFragment();
-    const addTag = (label, value) => {
-        if (value === undefined || value === null || value === '') return;
-        const tag = document.createElement('span');
-        const displayValue = typeof value === 'string' ? value : JSON.stringify(value);
-        tag.textContent = `${label}: ${displayValue}`;
-        tag.style.display = 'inline-block';
-        tag.style.margin = '4px';
-        tag.style.padding = '6px 10px';
-        tag.style.background = 'rgba(0, 0, 0, 0.25)';
-        tag.style.borderRadius = '12px';
-        fragment.appendChild(tag);
-    };
-
-    if (typeof itemStack.shiny == 'string') {
-        addTag('shiny', itemStack.shiny);
-    }
-
-    const actions = itemStack.actions;
-    if (actions && typeof actions === 'object') {
-        Object.entries(actions).forEach(([actionKey, actionValue]) => {
-            addTag(actionKey, actionValue);
-            if (actionValue && typeof actionValue === 'object') {
-                if (actionValue.condition !== undefined) addTag(`${actionKey} condition`, actionValue.condition);
-                if (actionValue.actions !== undefined) addTag(`${actionKey} actions`, actionValue.actions);
-            }
-        });
-    }
-
-    changeOpt.appendChild(fragment);
+    
+    // 刷新修改区域 B 组件的选项
+    refreshPropSelect(slide.keyName);
 }
 
 function formattedText(text) {

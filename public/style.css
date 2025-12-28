@@ -193,7 +193,7 @@ p {
     /* 确保图片填充模式正确 */
     object-fit: cover; 
 }
-.ouputContainer {
+.outputContainer {
     position: relative;
     display: flex;
     align-items: center;
