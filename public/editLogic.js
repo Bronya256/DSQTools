@@ -67,11 +67,12 @@ export function refreshPropSelect(keyName) {
 
     // 填充 Select
     paths.forEach(pathArr => {
+        let f = pathArr[pathArr.length - 1] == 'actions' ? 'Array<String>' : 'String';
         const op = document.createElement('option');
         // 将数组路径转为字符串显示
         op.value = JSON.stringify(pathArr); 
         const displayLabel = pathArr.length > 1 
-            ? `... ${pathArr[pathArr.length-2]} > ${pathArr[pathArr.length-1]}`
+            ? `${pathArr[pathArr.length-1]} ( ` + f + ' )'
             : pathArr.join(' > ');
         op.text = displayLabel;
         propSelect.add(op);
@@ -415,7 +416,12 @@ function rebuildAndSaveGlobal() {
             return logicStr;
         });
         
-        finalOutput = "js: " + parts.join(' && ');
+        if (parts.length > 1) {
+            finalOutput = "js:\n  " + parts.join(' &&\n  ');
+        } else {
+            // 如果只有一条，保持单行比较紧凑好看
+            finalOutput = "js: " + parts.join(' && ');
+        }
 
     } else {
         // 重建 Actions 数组
