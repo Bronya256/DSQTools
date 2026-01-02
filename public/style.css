@@ -1,45 +1,35 @@
 /* CSS 部分 - 负责页面的好看来 */
 
-/* 设置整个页面的样式 */
 body {
     margin: 0;
     min-height: 100vh;
-    /* 让页面占满整个屏幕高度 */
     display: flex;
     flex-direction: column;
-    /* 使用 Flex 布局让内容居中 */
     justify-content: flex-start;
-    /* 水平居中 */
     align-items: center;
-    /* 垂直居中 */
     font-family: 'JetBrains Mono', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: white;
-
-    /* 这里就是你要的【渐变色背景】 */
-    /* linear-gradient(角度, 颜色1, 颜色2) */
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     padding-top: 5%;
-    /* 顶部留点空隙 */
     padding-bottom: 60px;
-    /* 底部给 footer 留位置 */
 }
 
 /* 中间卡片的样式 */
 .card {
     background: rgba(255, 255, 255, 0.15);
-    /* 半透明白色背景 */
     backdrop-filter: blur(10px);
-    /* 毛玻璃模糊效果 */
     padding: 40px;
     border-radius: 20px;
-    /* 圆角 */
     box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-    /* 阴影 */
     text-align: center;
-    max-width: 400px;
-    width: 90%;
+    
+    /* 【修改点1】：修改最大宽度，让它变成宽屏大卡片喵！ */
+    max-width: 95%; /* 之前是 400px */
+    width: 95%;     /* 占据屏幕宽度的 95% */
+    
     margin: 10px;
     border: 1px solid rgba(255, 255, 255, 0.18);
+    box-sizing: border-box; /* 确保 padding 不会撑破宽度 */
 }
 
 h1 {
@@ -61,51 +51,47 @@ p {
     margin-bottom: 20px;
     border: 4px solid white;
     display: block;
-    /* 防止图片底部有空隙 */
     margin: 0 auto 20px auto;
-    /* 上下留空，左右居中 */
 }
 
 .TrmInput {
     border: 2px solid rgba(255, 255, 255, 0.3);
-    /* border-radius: 50px; */
     width: 100%;
-    height: 40vh;
+    /* 【核心修改】：加高！加高！ */
+    height: 60vh;      /* 占据屏幕高度的 60%，非常高！ */
+    min-height: 500px; /* 保底 500px，防止屏幕太矮时看不见 */
     margin-bottom: 20px;
     background: rgba(255, 255, 255, 0.5);
-    /* 半透明背景 */
     outline: none;
-    /* 最重要的一步：去掉默认聚焦黑/蓝框 */
     padding: 10px;
     font-family: 'JetBrains Mono', 'Segoe UI';
     font-size: 16px;
     color: white;
-    /* 输入的文字颜色 */
     box-sizing: border-box;
-    resize: none;
+    resize: vertical; /* 允许垂直拖动调整高度，禁用水平拖动 */
+    
+    /* 【修改点2】：禁止自动换行，超出部分显示横向滚动条 */
+    white-space: pre; 
+    overflow-x: auto; 
 }
 
 .TrmInput::-webkit-scrollbar {
     width: 8px;
+    height: 8px; /* 横向滚动条的高度 */
 }
 
 .TrmInput::-webkit-scrollbar-thumb {
     background-color: rgba(255, 255, 255, 0.3);
     border-radius: 4px;
 }
-
+.TrmInput::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+}
 .TrmInput::-webkit-scrollbar-track {
     background: transparent;
 }
 
-/* 4. 鼠标悬停在滑块上时的样子 */
-.magic-textarea::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.5);
-    /* 变亮一点，提示用户可以拖动 */
-    cursor: pointer;
-}
-
-/* 按钮的样式 */
 .action-btn {
     background-color: #ff6b6b;
     color: white;
@@ -116,59 +102,33 @@ p {
     cursor: pointer;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     transition: background-color 0.3s;
-    /* 颜色变化的过渡效果 */
     outline: none;
     user-select: none;
 }
 
 .action-btn:hover {
     background-color: #ff5252;
-    /* 鼠标悬停时的颜色 */
 }
 
-/* 定义“Q弹”的动画关键帧 */
 @keyframes bounce-animation {
-    0% {
-        transform: scale(1);
-    }
-
-    40% {
-        transform: scale(0.9);
-    }
-
-    /* 按下去变小 */
-    60% {
-        transform: scale(1.1);
-    }
-
-    /* 弹起来变大 */
-    80% {
-        transform: scale(0.95);
-    }
-
-    /*稍微回弹 */
-    100% {
-        transform: scale(1);
-    }
-
-    /* 回到原样 */
+    0% { transform: scale(1); }
+    40% { transform: scale(0.9); }
+    60% { transform: scale(1.1); }
+    80% { transform: scale(0.95); }
+    100% { transform: scale(1); }
 }
 
-/* 当按钮拥有这个类名时，执行动画 */
 .bounce {
     animation: bounce-animation 0.4s ease;
 }
 
-/* footer 放到底部并横向居中 */
 .footer {
     position: fixed;
-    /* 改为 fixed 保证一直在底部 */
     bottom: 0;
     width: 100%;
     text-align: center;
     padding: 12px 0;
     background: rgba(0, 0, 0, 0.2);
-    /* 稍微加点背景让文字看清 */
     backdrop-filter: blur(5px);
 }
 
@@ -177,22 +137,24 @@ p {
     top: 5%;
 }
 
-/* 展示盒子样式 */
 .pixel-icon {
-    /* 1. 设置想要显示的大小 (比如放大到 64x64) */
-    width: 64px; 
-    height: 64px;
-
-    /* 4. 关键：无损放大（抗锯齿/像素化） */
-    image-rendering: -moz-crisp-edges; /* Firefox */
-    image-rendering: -o-crisp-edges;   /* Opera */
-    image-rendering: -webkit-optimize-contrast; /* Webkit (non-standard naming) */
-    image-rendering: pixelated;        /* 标准属性：Chrome, Edge, Safari */
-    -ms-interpolation-mode: nearest-neighbor; /* IE (Optional) */
+    /* 从 64px 放大到 128px，超级显眼！ */
+    width: 128px; 
+    height: 128px;
     
-    /* 确保图片填充模式正确 */
-    object-fit: cover; 
+    /* 保持像素化清晰度 */
+    image-rendering: -moz-crisp-edges;
+    image-rendering: pixelated;
+    
+    object-fit: contain; /* 保证图标完整显示不被裁切 */
+    
+    /* 加个浮动动画让它更生动喵 */
+    transition: transform 0.3s ease;
 }
+.pixel-icon:hover {
+    transform: scale(1.1) rotate(5deg); /* 鼠标放上去会稍微变大歪头 */
+}
+
 .outputContainer {
     position: relative;
     display: flex;
@@ -201,7 +163,20 @@ p {
     background: rgba(0, 0, 0, 0.2);
     border-radius: 10px;
 }
+/* 提示文字样式 */
+.click-tip {
+    text-align: center; 
+    color: #eee;        /* 颜色更亮一点 */
+    font-size: 18px;    /* 字号加大 */
+    font-weight: bold;  /* 加粗 */
+    line-height: 1.5;   /* 行高舒服一点 */
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3); /* 加点阴影更清晰 */
+}
 .nav-btn {
+    width: 50px;       /* 按钮变宽 */
+    height: 50px;      /* 按钮变高 */
+    font-size: 28px;   /* 箭头变大 */
+    border-radius: 50%; /* 变成圆圆的按钮 */
     background: rgba(0, 0, 0 , 0.2);
     border: none;
     color: white;
@@ -229,38 +204,33 @@ p {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.7); /* 深色遮罩 */
-    backdrop-filter: blur(5px); /* 背景模糊 */
-    z-index: 9999; /* 保证在最上面 */
+    background-color: rgba(0, 0, 0, 0.7); 
+    backdrop-filter: blur(5px); 
+    z-index: 9999; 
     display: flex;
     justify-content: center;
     align-items: center;
-    /* 进场动画 */
     animation: fadeIn 0.3s ease;
 }
 
 #detailOverlay .detail-content {
-    /* 继承 card 样式，但做一些特化 */
-    max-width: 600px; /* 更宽一点 */
-    width: 85%;
-    max-height: 80vh; /* 防止太高超出屏幕 */
+    max-width: 90%; /* 弹窗也改宽一点 */
+    width: 90%;
+    max-height: 80vh; 
     display: flex;
     flex-direction: column;
-    overflow: hidden; /* 防止内容溢出圆角 */
+    overflow: hidden; 
 }
 
-/* Lore 滚动区域，防止Lore太长把屏幕撑爆 */
 .lore-scroll-container {
     overflow-y: auto;
     flex: 1;
     padding: 10px;
     background: rgba(0,0,0,0.2);
     border-radius: 10px;
-    /* 自定义滚动条 */
     scrollbar-width: thin;
     scrollbar-color: rgba(255,255,255,0.3) transparent;
 }
-
 .lore-scroll-container::-webkit-scrollbar {
     width: 6px;
 }
@@ -276,4 +246,21 @@ p {
 
 [hidden] {
     display: none !important;
+}
+
+/* 编辑器小输入框样式补充 */
+.editor-input {
+    width: 100%;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 6px;
+    padding: 6px;
+    color: white;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    outline: none;
+    box-sizing: border-box;
+    /* 同样的横向滚动逻辑 */
+    white-space: pre;
+    overflow-x: auto;
 }
