@@ -1,6 +1,7 @@
 
 /**
  * 提取对象所需要分析的路径
+ * 针对对象 itemData，提取 display.shiny 以及 actions 下的 condition 和 actions 路径
  * @param {Object} itemData 物品数据对象
  * @return {Array<Array<string>>} 返回需要分析的路径数组
  */
