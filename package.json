@@ -1,11 +1,12 @@
 {
   "dependencies": {
     "@sfirew/minecraft-motd-parser": "^1.1.6",
+    "express": "^5.2.1",
     "js-yaml": "^4.1.1"
   },
   "name": "dsqweb",
   "version": "1.0.0",
-  "main": "nodejs.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
