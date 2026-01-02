@@ -67,12 +67,13 @@ export function refreshPropSelect(keyName) {
 
     // 填充 Select
     paths.forEach(pathArr => {
-        let f = pathArr[pathArr.length - 1] == 'actions' ? 'Array<String>' : 'String';
+        let objType = pathArr[pathArr.length - 1] == 'actions' ? 'Array<String>' : 'String';
+        let fstKey = pathArr[0] == 'display' ? 'display' : 'action';
         const op = document.createElement('option');
         // 将数组路径转为字符串显示
         op.value = JSON.stringify(pathArr); 
         const displayLabel = pathArr.length > 1 
-            ? `${pathArr[pathArr.length-1]} ( ` + f + ' )'
+            ? fstKey + `: ${pathArr[pathArr.length-1]} ( ` + objType + ' )'
             : pathArr.join(' > ');
         op.text = displayLabel;
         propSelect.add(op);
