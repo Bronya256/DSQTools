@@ -1,6 +1,6 @@
 import yaml from 'js-yaml';
 import { autoToHTML } from '@sfirew/minecraft-motd-parser';
-// import { refreshPropSelect } from './editLogic.js';
+import { refreshPropSelect } from './editLogic.js';
 
 // 读取页面元素
 const TrmText = document.getElementById('trmText');
@@ -72,9 +72,7 @@ pixelIcon.addEventListener('click', function() {
     }
 });
 
-// 新增：点击弹窗遮罩层（或者任意位置）关闭弹窗喵
 detailOverlay.addEventListener('click', function(e) {
-    // 无论点哪里都关闭吧，体验更流畅喵
     detailOverlay.hidden = true;
 });
 
