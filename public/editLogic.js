@@ -224,7 +224,25 @@ function parseRawValueToConditions(val, type) {
                     return;
                 }
             }
-
+            if (line.includes('cmi usermeta')) {
+                // 正则说明：
+                // increment 后面的 (.+?) 捕获任意字符作为 key
+                // 最后的 ([+\-]?[\d\.]+) 捕获带符号的数字作为 amount
+                const metaMatch = line.match(/cmi usermeta %player_name% increment (.+?) ([+\-]?[\d\.]+)/);
+                
+                if (metaMatch) {
+                    parsedConditions.push({
+                        type: 'meta',          // 类型对应之前的 'meta'
+                        name: '修改数据',       // 起个名字
+                        key: metaMatch[1].trim(), // 捕获到的 Key，比如 "生命棍木法杖铸造次数"
+                        amount: parseFloat(metaMatch[2]), // 捕获到的值，比如 +1
+                        rawLogic: line,
+                        isParsed: true,
+                        isAction: true
+                    });
+                    return; // 匹配成功就直接返回，不走下面的 raw 逻辑了喵
+                }
+            }
             parsedConditions.push({
                 type: 'raw', 
                 name: '指令',
@@ -538,46 +556,3 @@ function rebuildAndSaveGlobal() {
         propSelect.options[propSelect.selectedIndex].text = originalText;
     }, 1000);
 };
-
-// 绑定同步按钮事件
-btnSync.addEventListener('click', () => {
-    // 简单的确认防手滑
-    if(!confirm("确认要将当前条件同步到该物品下的【所有】其他路径吗？\n(包括 actions 和 condition)")) return;
-
-    saveCurrentEdit(); // 先保存当前编辑框的内容
-
-    const { globalParsedData } = getGlobalData();
-    const itemData = globalParsedData[currentKeyName];
-    const allPaths = Utils.ParsedPaths(itemData); // 获取所有路径
-
-    // 遍历所有路径进行覆盖
-    allPaths.forEach(targetPath => {
-        // 跳过自己，虽然覆盖也没事，但为了性能跳过
-        if (JSON.stringify(targetPath) === JSON.stringify(currentPath)) return;
-
-        // 判断目标路径是 String 还是 Array
-        // 规则：只要路径最后是 'actions' 或者是 'actions' 下的 'actions' 列表，就是 Array
-        // 但根据 ParsedPaths 的逻辑，actions 下面还有 index 和 'actions'/'condition'
-        // 一般来说：endsWith 'actions' -> Array, endsWith 'condition' -> String
-        // 或者直接看原来的值类型
-        
-        const lastKey = targetPath[targetPath.length - 1];
-        // 如果是 'actions' 键，或者是 actions 列表里的 actions 字段，肯定是 Array
-        // 如果是 'condition'，肯定是 String (js check)
-        // 如果是 display.shiny，是 String (true/false 被 yaml 转 string 或者 boolean) -> 这里假设 boolean 转 string
-        
-        let targetType = 'String';
-        if (lastKey === 'actions') targetType = 'Array';
-        
-        // 生成新的值
-        const newContent = generateOutputFromConditions(parsedConditions, targetType);
-        
-        // 写入
-        Utils.setValueByPath(itemData, targetPath, newContent);
-    });
-
-    setGlobalData({ globalParsedData });
-    rebuildAndSaveGlobal(); // 触发一次保存以更新右侧 YAML 输出
-
-    alert("同步完成喵！所有的条件都已经变成一样的了！");
-});
