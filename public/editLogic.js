@@ -135,6 +135,91 @@ btnPlus.addEventListener('click', () => {
     rebuildAndSaveGlobal();
 });
 
+// 绑定同步按钮 (核心功能实现喵)
+btnSync.addEventListener('click', () => {
+    // 1. 先保存当前正在编辑的内容，防止数据还没写入 parsedConditions
+    saveCurrentEdit();
+    rebuildAndSaveGlobal(); // 确保 Global 数据也是最新的
+
+    // 2. 提取当前源数据中“已解析”的部分 (Raw行不参与同步给别人)
+    const sourceConditionsToSync = parsedConditions.filter(c => c.isParsed);
+
+    if (sourceConditionsToSync.length === 0) {
+        // 给个提示，不然主人以为我偷懒喵
+        const originalText = btnSync.innerText;
+        btnSync.innerText = "空空如也?";
+        setTimeout(() => btnSync.innerText = originalText, 1500);
+        return;
+    }
+
+    const { globalParsedData } = getGlobalData();
+    const itemData = globalParsedData[currentKeyName];
+    const options = Array.from(propSelect.options);
+    let syncCount = 0;
+
+    // 获取源属性的类型 (判断当前是在 String 还是 Array 上)
+    const lastSourceKey = currentPath[currentPath.length - 1];
+    let sourceType = 'String';
+    if (lastSourceKey === 'actions' || lastSourceKey === 'lore') {
+        sourceType = 'Array';
+    }
+
+    // 3. 遍历所有其他选项进行同步
+    options.forEach(op => {
+        // 跳过自己
+        if (op.selected) return;
+
+        const targetPath = JSON.parse(op.value);
+        const lastKey = targetPath[targetPath.length - 1];
+        
+        // 判断目标类型
+        let targetType = 'String';
+        if (lastKey === 'actions' || lastKey === 'lore') {
+            targetType = 'Array';
+        }
+
+        // 【修改点】：类型不同就不折腾了，String只找String，Array只找Array喵
+        if (sourceType !== targetType) return;
+
+        let finalConditionsForTarget = [];
+
+        if (targetType === 'String') {
+            // 如果目标是 String，直接覆盖 (String 之间直接同步)
+            finalConditionsForTarget = [...sourceConditionsToSync];
+        } else {
+            // 如果目标是 Array，需要保留目标原有的 Raw 行
+            
+            // 获取目标的原始值
+            const targetRawValue = Utils.getValueByPath(itemData, targetPath);
+            // 解析目标，找出其中的 Raw 行
+            const targetExistingConditions = getConditionsFromValue(targetRawValue, targetType);
+            const targetRawConditions = targetExistingConditions.filter(c => !c.isParsed);
+            
+            // 合并：保留的Raw行 + 我们的同步行
+            finalConditionsForTarget = [...targetRawConditions, ...sourceConditionsToSync];
+        }
+
+        // 4. 生成新数据并写入
+        const finalOutput = generateOutputFromConditions(finalConditionsForTarget, targetType);
+        Utils.setValueByPath(itemData, targetPath, finalOutput);
+        syncCount++;
+    });
+
+    // 5. 保存全局数据并更新界面
+    setGlobalData({ globalParsedData });
+    
+    // 重新生成 YAML 预览
+    rebuildAndSaveGlobal();
+
+    // 视觉反馈
+    const originalText = btnSync.innerText;
+    if (syncCount === 0) {
+        btnSync.innerText = "无匹配目标";
+    } else {
+        btnSync.innerText = `同步了${syncCount}处!`;
+    }
+    setTimeout(() => btnSync.innerText = originalText, 1500);
+});
 // ============================================================
 // 核心逻辑区域喵
 // ============================================================
@@ -160,11 +245,11 @@ function loadPropData() {
     parseRawValueToConditions(currentRawValue, typeStr);
     refreshConditionSelect();
 }
+function getConditionsFromValue(val, type) {
+    const conditions = [];
 
-function parseRawValueToConditions(val, type) {
-    parsedConditions = []; 
+    if (val === undefined || val === null) return conditions; 
 
-    if (val === undefined || val === null) return; 
     if (type === 'String') {
         let cleanVal = val.startsWith('js:') ? val.substring(3).trim() : val;
         const parts = cleanVal.split('&&');
@@ -181,9 +266,9 @@ function parseRawValueToConditions(val, type) {
                 parsedItem.rawLogic = part; 
                 parsedItem.isParsed = true; 
                 parsedItem.isAction = false; 
-                parsedConditions.push(parsedItem);
+                conditions.push(parsedItem);
             } else {
-                parsedConditions.push({
+                conditions.push({
                     type: 'raw',
                     name: 'Raw Logic',
                     key: part,
@@ -204,7 +289,7 @@ function parseRawValueToConditions(val, type) {
                     parsedItem.rawLogic = line;
                     parsedItem.isParsed = true;
                     parsedItem.isAction = true; 
-                    parsedConditions.push(parsedItem);
+                    conditions.push(parsedItem);
                     return; 
                 }
             }
@@ -212,7 +297,7 @@ function parseRawValueToConditions(val, type) {
             if (line.includes('cmi money take')) {
                 const moneyMatch = line.match(/cmi money take %player_name% ([\d\.]+)/);
                 if (moneyMatch) {
-                    parsedConditions.push({
+                    conditions.push({
                         type: 'money',
                         name: '扣除金币',
                         key: 'balance',
@@ -225,25 +310,21 @@ function parseRawValueToConditions(val, type) {
                 }
             }
             if (line.includes('cmi usermeta')) {
-                // 正则说明：
-                // increment 后面的 (.+?) 捕获任意字符作为 key
-                // 最后的 ([+\-]?[\d\.]+) 捕获带符号的数字作为 amount
                 const metaMatch = line.match(/cmi usermeta %player_name% increment (.+?) ([+\-]?[\d\.]+)/);
-                
                 if (metaMatch) {
-                    parsedConditions.push({
-                        type: 'meta',          // 类型对应之前的 'meta'
-                        name: '修改数据',       // 起个名字
-                        key: metaMatch[1].trim(), // 捕获到的 Key，比如 "生命棍木法杖铸造次数"
-                        amount: parseFloat(metaMatch[2]), // 捕获到的值，比如 +1
+                    conditions.push({
+                        type: 'meta',
+                        name: '修改数据',
+                        key: metaMatch[1].trim(),
+                        amount: parseFloat(metaMatch[2]),
                         rawLogic: line,
                         isParsed: true,
                         isAction: true
                     });
-                    return; // 匹配成功就直接返回，不走下面的 raw 逻辑了喵
+                    return;
                 }
             }
-            parsedConditions.push({
+            conditions.push({
                 type: 'raw', 
                 name: '指令',
                 key: line, 
@@ -253,6 +334,11 @@ function parseRawValueToConditions(val, type) {
             });
         });
     }
+
+    return conditions;
+}
+function parseRawValueToConditions(val, type) {
+    parsedConditions = getConditionsFromValue(val, type);
 }
 
 function analyzeVarContent(str) {
