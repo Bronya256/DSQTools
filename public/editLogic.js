@@ -33,6 +33,8 @@ const yamlOutput = document.getElementById('yamlOutput');
 const btnSave = document.getElementById('savePropBtn');
 const btnDel = document.getElementById('delPropBtn');
 const btnPlus = document.getElementById('plusCondition');
+const btnSync = document.getElementById('syncPropBtn'); 
+const inputUseName = document.getElementById('checkUseName'); // 勾选框
 
 // ============================================================
 // 初始化与导出函数喵
@@ -72,6 +74,7 @@ export function refreshPropSelect(keyName) {
         const op = document.createElement('option');
         // 将数组路径转为字符串显示
         op.value = JSON.stringify(pathArr); 
+        // console.log(op.value);
         const displayLabel = pathArr.length > 1 
             ? fstKey + `: ${pathArr[pathArr.length-1]} ( ` + objType + ' )'
             : pathArr.join(' > ');
@@ -109,8 +112,8 @@ btnDel.addEventListener('click', () => {
     if(currentConditionIdx === -1) return;
     parsedConditions.splice(currentConditionIdx, 1);
     refreshConditionSelect(); // 刷新列表
-    resetEditor(); // 重置右侧
     rebuildAndSaveGlobal(); // 保存更改
+    console.log(currentConditionIdx);
 });
 
 // 绑定添加按钮
@@ -144,10 +147,13 @@ function loadPropData() {
     const itemData = globalParsedData[currentKeyName];
     
     currentRawValue = Utils.getValueByPath(itemData, currentPath);
+    const lastKey = currentPath[currentPath.length - 1];
 
-    let typeStr = 'Unknown';
-    if (Array.isArray(currentRawValue)) typeStr = 'Array';
-    else if (typeof currentRawValue === 'string') typeStr = 'String';
+    let typeStr = 'String';
+    // 只要是 actions 或者是 lore，就肯定是数组，哪怕它现在是空的
+    if (lastKey === 'actions' || lastKey === 'lore') {
+        typeStr = 'Array';
+    }
     
     propTypeDisplay.innerText = `Type: ${typeStr}`;
     
@@ -158,6 +164,7 @@ function loadPropData() {
 function parseRawValueToConditions(val, type) {
     parsedConditions = []; 
 
+    if (val === undefined || val === null) return; 
     if (type === 'String') {
         let cleanVal = val.startsWith('js:') ? val.substring(3).trim() : val;
         const parts = cleanVal.split('&&');
@@ -243,11 +250,26 @@ function analyzeVarContent(str) {
         const metaKey = cleanStr.replace('cmi_user_meta_', '');
         return { type: 'meta', name: '玩家数据', key: metaKey };
     }
-    if (cleanStr.startsWith('checkitem_amount_nameequals:')) {
-        const parts = cleanStr.split(',nbtstrings:');
-        const itemName = parts[0].replace('checkitem_amount_nameequals:', '');
-        const nbtPart = parts[1] || '';
-
+    // nbt处理
+    if (cleanStr.includes('_nameequals:') || cleanStr.includes('_nbtstrings:')) {
+        const isNameEquals = cleanStr.includes('_nameequals:');
+        // 分割字符串
+        // 如果是 nameequals，它长这样: ...nameequals:名字,nbtstrings:...
+        // 如果是 nbtstrings，它长这样: ...nbtstrings:...
+        let itemName = '未知物品';
+        let nbtPart = '';
+        if (isNameEquals) {
+            const parts = cleanStr.split(',nbtstrings:');
+            // 提取 nameequals: 后面的部分
+            // 注意：可能是 checkitem_amount_nameequals 或 checkitem_amount_remove_nameequals
+            const namePart = parts[0].split('_nameequals:')[1]; 
+            itemName = namePart || '未知';
+            nbtPart = parts[1] || '';
+        } else {
+            // 没有 nameequals，直接提取 nbtstrings 后面的
+            nbtPart = cleanStr.split('_nbtstrings:')[1] || '';
+            itemName = 'NBT物品(无名)';
+        }
         let finalType = 'unknown';
         let finalKey = nbtPart;
 
@@ -259,7 +281,12 @@ function analyzeVarContent(str) {
             finalKey = nbtPart.split('PublicBukkitValues..mythicmobs:type=')[1];
         }
 
-        return { type: finalType, name: itemName, key: finalKey };
+        return { 
+            type: finalType, 
+            name: itemName, 
+            key: finalKey, 
+            useName: isNameEquals // 【新增标记】
+        };
     }
 
     return { type: 'unknown', name: '未知变量', key: cleanStr };
@@ -271,7 +298,7 @@ function analyzeRemoveContent(str) {
     if (amtMatch) amount = parseInt(amtMatch[1]);
 
     const strWithoutAmt = str.replace(/,amt:\d+/, '');
-    const strForAnalysis = strWithoutAmt.replace('checkitem_amount_remove_nameequals:', 'checkitem_amount_nameequals:');
+    const strForAnalysis = strWithoutAmt.replace('checkitem_amount_remove_', 'checkitem_amount_');
     
     const baseInfo = analyzeVarContent(strForAnalysis);
     baseInfo.amount = amount;
@@ -350,17 +377,28 @@ function loadConditionDetail(index) {
         inputAmount.value = 0;
         inputAmount.disabled = true;
         inputLogic.value = cond.rawLogic;
+        inputUseName.checked = false; 
+        inputUseName.disabled = true;
     } else {
         inputType.disabled = false;
         inputName.disabled = false;
         inputAmount.disabled = false;
 
         inputType.value = cond.type || 'unknown';
+
         inputName.value = cond.name;
+        inputUseName.checked = (cond.useName !== undefined) ? cond.useName : true;
+        inputUseName.disabled = false;
+        // 如果是 money/level/meta 类型，这个勾选框没意义，可以禁用掉
+        if(['money','level','meta'].includes(cond.type)){
+             inputUseName.disabled = true;
+        }
+
         inputKey.value = cond.key;
         inputAmount.value = cond.amount;
         // 这里的 rawLogic 会在 rebuildAndSaveGlobal 后被更新
         inputLogic.value = cond.rawLogic || '(保存后生成)';
+        
     }
 }
 
@@ -388,67 +426,87 @@ function saveCurrentEdit() {
         cond.key = inputKey.value;
         cond.amount = parseFloat(inputAmount.value);
         cond.isParsed = true;
+        cond.useName = inputUseName.checked;
     }
 }
 
-function rebuildAndSaveGlobal() {
-    let finalOutput = null;
-    const propType = propTypeDisplay.innerText.includes('Array') ? 'Array' : 'String';
-
-    if (propType === 'String') {
-        // 重建 JS 条件字符串
-        const parts = parsedConditions.map(cond => {
+// 【新增函数】核心生成器，根据条件列表和目标类型生成最终字符串/数组
+function generateOutputFromConditions(conditions, targetType) {
+    if (targetType === 'String') {
+        // 生成 JS 逻辑
+        const parts = conditions.map(cond => {
             if (cond.type === 'raw') return cond.key;
             
             let varStr = '';
+            // 处理 useName 逻辑
+            const useName = (cond.useName !== undefined) ? cond.useName : true;
+            
             if (cond.type === 'money') varStr = '%cmi_user_balance%';
             else if (cond.type === 'level') varStr = '%player_level%';
             else if (cond.type === 'meta') varStr = `%cmi_user_meta_${cond.key}%`;
-            else if (cond.type === 'mythicmobs') {
-                varStr = `%checkitem_amount_nameequals:${cond.name},nbtstrings:PublicBukkitValues..mythicmobs:type=${cond.key}%`;
-            } else if (cond.type === 'neigeitems') {
-                varStr = `%checkitem_amount_nameequals:${cond.name},nbtstrings:NeigeItems..id=${cond.key}%`;
+            else if (cond.type === 'mythicmobs' || cond.type === 'neigeitems') {
+                // 【核心修改点1】：根据 checkbox 决定格式
+                const prefix = useName ? `nameequals:${cond.name},` : ``;
+                const idKey = cond.type === 'mythicmobs' ? 'PublicBukkitValues..mythicmobs:type' : 'NeigeItems..id';
+                varStr = `%checkitem_amount_${prefix}nbtstrings:${idKey}=${cond.key}%`;
             }
             
+            // 实时更新对象的 rawLogic (仅用于当前编辑视图回显，不影响 Sync)
             const logicStr = `vars("${varStr}") >= ${cond.amount}`;
-            
-            // 【关键修改】实时更新当前对象的 rawLogic 属性，并同步到 UI
-            cond.rawLogic = logicStr;
+            cond.rawLogic = logicStr; 
             return logicStr;
         });
         
-        if (parts.length > 1) {
-            finalOutput = "js:\n  " + parts.join(' &&\n  ');
-        } else {
-            // 如果只有一条，保持单行比较紧凑好看
-            finalOutput = "js: " + parts.join(' && ');
-        }
+        if (parts.length === 0) return undefined;
+        if (parts.length > 1) return "js:\n  " + parts.join(' &&\n  ');
+        // 只有1个条件用join和parts[0]没区别
+        return "js: " + parts.join(' && ');
 
     } else {
-        // 重建 Actions 数组
-        finalOutput = parsedConditions.map(cond => {
+        // 生成 Actions 数组
+        return conditions.map(cond => {
             if (cond.type === 'raw') return cond.key; 
             
             let logicStr = '';
+            // 处理 useName 逻辑
+            const useName = (cond.useName !== undefined) ? cond.useName : true;
+
             if (cond.type === 'money') {
+                let plus = cond.amount >= 0 ? '+' : '';
                 logicStr = `console: cmi money take %player_name% ${cond.amount}`;
-            } else {
-                let innerStr = '';
-                if (cond.type === 'mythicmobs') {
-                    innerStr = `checkitem_amount_remove_nameequals:${cond.name},nbtstrings:PublicBukkitValues..mythicmobs:type=${cond.key},amt:${cond.amount}`;
-                } else if (cond.type === 'neigeitems') {
-                    innerStr = `checkitem_amount_remove_nameequals:${cond.name},nbtstrings:NeigeItems..id=${cond.key},amt:${cond.amount}`;
+            } else if (cond.type === 'meta') {
+                let plus = cond.amount >= 0 ? '+' : '';
+                logicStr = `console: cmi usermeta increment %player_name% ${cond.key} ` + plus + `${cond.amount}`;
+            } else if (cond.type === 'mythicmobs' || cond.type === 'neigeitems') {
+
+                const actionType = useName ? 'remove_nameequals' : 'remove_nbtstrings';
+                const idKey = cond.type === 'mythicmobs' ? 'PublicBukkitValues..mythicmobs:type' : 'NeigeItems..id';
+                
+                let innerStr = "";
+                if(useName) {
+                    // 格式: remove_nameequals:名字,nbtstrings:ID=KEY,amt:数量
+                    innerStr = `${actionType}:${cond.name},nbtstrings:${idKey}=${cond.key},amt:${cond.amount}`;
                 } else {
-                    logicStr = `console: say Unknown Action Rebuild ${cond.name}`;
+                    // 格式: remove_nbtstrings:ID=KEY,amt:数量
+                    innerStr = `${actionType}:${idKey}=${cond.key},amt:${cond.amount}`;
                 }
-                if(!logicStr) logicStr = `console: papi parse %player_name% %${innerStr}%`;
+                
+                logicStr = `console: papi parse %player_name% %checkitem_amount_${innerStr}%`;
+                
+            } else {
+                logicStr = `console: say Unknown Action Rebuild ${cond.name}`;
             }
             
-            // 【关键修改】实时更新当前对象的 rawLogic
             cond.rawLogic = logicStr;
             return logicStr;
         });
     }
+}
+
+// 修改 rebuildAndSaveGlobal 来调用上面的函数
+function rebuildAndSaveGlobal() {
+    const propType = propTypeDisplay.innerText.includes('Array') ? 'Array' : 'String';
+    const finalOutput = generateOutputFromConditions(parsedConditions, propType); // 调用新函数
 
     // 1. 写入 GlobalData
     const { globalParsedData } = getGlobalData();
@@ -456,29 +514,70 @@ function rebuildAndSaveGlobal() {
     Utils.setValueByPath(itemData, currentPath, finalOutput);
     setGlobalData({ globalParsedData });
     
-    // 2. 【关键修改】强制刷新当前编辑器里的 "原始逻辑" 框
+    // 2. 刷新 rawLogic 显示
     if (currentConditionIdx !== -1) {
         inputLogic.value = parsedConditions[currentConditionIdx].rawLogic;
     }
 
-    // 3. 【关键修改】导出整个 YAML 到右侧 ChangeBoxB
+    // 3. 导出 YAML (保持不变)
     try {
         const yamlStr = yaml.dump(globalParsedData, {
             indent: 2,
-            lineWidth: -1, // 不换行
-            noRefs: true   // 禁用引用
+            lineWidth: -1,
+            noRefs: true
         });
         yamlOutput.value = yamlStr;
     } catch (e) {
-        console.error("YAML导出失败", e);
         yamlOutput.value = "导出失败: " + e.message;
     }
 
-    // 更新 Select 显示，1s后恢复
-    
+    // 视觉反馈 (保持不变)
     var originalText = propSelect.options[propSelect.selectedIndex].text;
     propSelect.options[propSelect.selectedIndex].text = "已保存 ✔";
     setTimeout(() => {
         propSelect.options[propSelect.selectedIndex].text = originalText;
     }, 1000);
-}
+};
+
+// 绑定同步按钮事件
+btnSync.addEventListener('click', () => {
+    // 简单的确认防手滑
+    if(!confirm("确认要将当前条件同步到该物品下的【所有】其他路径吗？\n(包括 actions 和 condition)")) return;
+
+    saveCurrentEdit(); // 先保存当前编辑框的内容
+
+    const { globalParsedData } = getGlobalData();
+    const itemData = globalParsedData[currentKeyName];
+    const allPaths = Utils.ParsedPaths(itemData); // 获取所有路径
+
+    // 遍历所有路径进行覆盖
+    allPaths.forEach(targetPath => {
+        // 跳过自己，虽然覆盖也没事，但为了性能跳过
+        if (JSON.stringify(targetPath) === JSON.stringify(currentPath)) return;
+
+        // 判断目标路径是 String 还是 Array
+        // 规则：只要路径最后是 'actions' 或者是 'actions' 下的 'actions' 列表，就是 Array
+        // 但根据 ParsedPaths 的逻辑，actions 下面还有 index 和 'actions'/'condition'
+        // 一般来说：endsWith 'actions' -> Array, endsWith 'condition' -> String
+        // 或者直接看原来的值类型
+        
+        const lastKey = targetPath[targetPath.length - 1];
+        // 如果是 'actions' 键，或者是 actions 列表里的 actions 字段，肯定是 Array
+        // 如果是 'condition'，肯定是 String (js check)
+        // 如果是 display.shiny，是 String (true/false 被 yaml 转 string 或者 boolean) -> 这里假设 boolean 转 string
+        
+        let targetType = 'String';
+        if (lastKey === 'actions') targetType = 'Array';
+        
+        // 生成新的值
+        const newContent = generateOutputFromConditions(parsedConditions, targetType);
+        
+        // 写入
+        Utils.setValueByPath(itemData, targetPath, newContent);
+    });
+
+    setGlobalData({ globalParsedData });
+    rebuildAndSaveGlobal(); // 触发一次保存以更新右侧 YAML 输出
+
+    alert("同步完成喵！所有的条件都已经变成一样的了！");
+});

@@ -69,7 +69,7 @@
                     </div>
                     <div id="propTypeDisplay" class="prop-type-label">Type: Unknown</div>
                 </div>
-
+                <button id="syncPropBtn" class="action-btn small-btn" style="background-color: #a29bfe; margin-right: 5px;" title="将当前条件同步给该物品的所有其他属性">🔄</button>
                 <button id="savePropBtn" class="action-btn small-btn save-btn" title="保存修改回对象">💾</button>
             </div>
             
@@ -89,6 +89,10 @@
                     <div class="editor-field">
                         <label>材料名称 (Name)</label>
                         <input id="editName" class="editor-input">
+                        <div style="margin-top: 5px; font-size: 12px; display: flex; align-items: center;">
+                            <input type="checkbox" id="checkUseName" style="margin-right: 5px; cursor: pointer;">
+                            <label for="checkUseName" style="cursor: pointer; margin: 0; display: inline;">生成时包含名称校验 (nameequals)</label>
+                        </div>
                     </div>
                     <div>
                         <label>材料键名 (Key)</label>
